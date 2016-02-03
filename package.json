@@ -1,0 +1,42 @@
+{
+  "name": "charon",
+  "private": true,
+  "version": "0.0.1",
+  "description": "#1GAM - vol 1",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/konogan/onegam-charon"
+  },
+  "keywords": [
+    "pixi.js",
+    "game",
+    "#1GAM"
+  ],
+  "author": "Konogan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/konogan/onegam-charon/issues"
+  },
+  "homepage": "https://github.com/konogan/onegam-charon",
+  "devDependencies": {
+    "babelify": "^6.0.2",
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^3.8.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-express-server": "^0.5.1",
+    "load-grunt-tasks": "^3.1.0"
+  },
+  "dependencies": {
+    "pixi.js": "^3.0"
+  },
+  "engines": {
+    "node": "0.12.x"
+  }
+}
