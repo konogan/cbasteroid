@@ -32,8 +32,7 @@ module.exports = function(grunt) {
           expand: true,
           flatten: true,
           src: [
-            './node_modules/pixi.js/bin/pixi.min.js',
-            './node_modules/pixi.js/bin/pixi.min.js.map'
+            './node_modules/three/three.min.js'
           ],
           dest: 'dist/js/vendor/'
         }]
@@ -42,7 +41,7 @@ module.exports = function(grunt) {
 
     jshint: {
       options: {
-        jshintrc: true,
+        esnext: true,
         force: true
       },
       files: ['src/**/*.js']
@@ -78,6 +77,6 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('lint', ['jshint']);
-  grunt.registerTask('build', ['clean', 'copy', 'browserify:dist']);
-  grunt.registerTask('default', ['build', 'watch']);
+  grunt.registerTask('build', ['clean', 'jshint', 'copy', 'browserify:dist']);
+  grunt.registerTask('default', ['jshint', 'build', 'watch']);
 };

@@ -1,3 +1,4 @@
+
 class Game {
   constructor() {
     this.state = {
@@ -5,11 +6,12 @@ class Game {
       'mouse': {},
       'objects': []
     };
+
+    this.clock = new THREE.Clock();
+    console.log(new THREE.Clock());
   }
 
   run() {
-
-    console.log(this);
   }
 
   addEventListenerToElement(element) {
