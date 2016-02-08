@@ -6,12 +6,7 @@ class Application {
     this.center = new THREE.Vector3(0, 0, 0);
 
     this.container = domElement;
-    this.createScene();
-  }
 
-
-
-  createScene() {
     this.scene = new THREE.Scene();
     // camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
@@ -33,30 +28,62 @@ class Application {
     this.spotLight.shadow.camera.fov = 30;
     this.scene.add(this.spotLight);
 
+    // renderer
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.cullFace = THREE.CullFaceBack;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-
     this.container.appendChild(this.renderer.domElement);
-    this.createListeners();
-    this.render();
+
+    // Fullscreen event
+    if (
+      document.fullscreenEnabled ||
+      document.webkitFullscreenEnabled ||
+      document.mozFullScreenEnabled ||
+      document.msFullscreenEnabled
+    ) {
+      window.addEventListener('click', event => this.setFullscreen(document.documentElement, event), false);
+    }
+
+    this.controls = new THREE.DeviceOrientationControls(this.camera);
+
+    // this.controls = new THREE.OrbitControls(this.camera, this.container);
+    // this.controls.target.set(
+    //   this.camera.position.x + 0.1,
+    //   this.camera.position.y,
+    //   this.camera.position.z
+    // );
+
+    this.controls.connect();
+
+    // if (typeof window.DeviceOrientationEvent != "undefined") {
+    //   window.addEventListener('deviceorientation', event => this.setControls(event), true);
+    // } else {
+
+    // }
+    window.addEventListener('resize', event => this.resize(event), false);
+    this.animate();
   }
 
-  createListeners() {
-    window.addEventListener('resize', () => this.resize(), false);
-    //this.container.addEventListener('click', self.fullscreen, false);
-  }
+  // setControls(event) {
+  //   if (event.alpha) {
+  //     this.controls = new THREE.DeviceOrientationControls(this.camera, true);
+  //     this.controls.connect();
+  //     this.controls.update();
 
-  fullscreen() {
-    if (this.container.requestFullscreen) {
-      this.container.requestFullscreen();
-    } else if (this.container.msRequestFullscreen) {
-      this.container.msRequestFullscreen();
-    } else if (this.container.mozRequestFullScreen) {
-      this.container.mozRequestFullScreen();
-    } else if (this.container.webkitRequestFullscreen) {
-      this.container.webkitRequestFullscreen();
+  //     window.removeEventListener('deviceorientation', event => this.setControls(event), true);
+  //   }
+  // }
+
+  setFullscreen(element) {
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen();
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen();
     }
   }
 
@@ -69,16 +96,23 @@ class Application {
     //this.effect.setSize(width, height);
   }
 
-  render() {
-
+  update(delta) {
+    this.controls.update();
     this.objects.forEach((object) => {
-      object.update(this.clock.getDelta());
+      object.update(delta);
     });
+  }
 
+  render(delta) {
     this.renderer.render(this.scene, this.camera);
+  }
+
+  animate() {
+    this.update(this.clock.getDelta());
+    this.render(this.clock.getDelta());
 
     requestAnimationFrame(() => {
-      this.render();
+      this.animate();
     });
   }
 

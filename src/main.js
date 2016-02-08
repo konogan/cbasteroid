@@ -4,11 +4,19 @@ import Floor from './floor';
 
 let app = new Application(document.body);
 
-app.add(new Cube({
-  width: 1,
-  height: 1,
-  depth: 1
-}));
+
+
+for (var i = 0; i < 200; i++) {
+  app.add(new Cube({
+    width: 10,
+    height: 10,
+    depth: 10,
+    x: Math.random() * 500 - 250,
+    y: Math.random() * 500 - 250,
+    z: Math.random() * 500 - 250
+  }));
+}
+
 
 // app.add(new Cube({
 //   width: 12,
@@ -19,7 +27,8 @@ app.add(new Cube({
 var plane = new Floor({
   width: 1000,
   height: 1000
-}, 0xffff00
-);
+}, 0xffff00);
 
-//app.add(plane);
+
+// console.log(app);
+// app.add(plane);
