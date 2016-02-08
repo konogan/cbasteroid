@@ -9,29 +9,33 @@ class Application {
     this.createScene();
   }
 
+
+
   createScene() {
     this.scene = new THREE.Scene();
+    // camera
     this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
     this.camera.position.set(10, 5, 0);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
+
+    //lights
     this.light = new THREE.HemisphereLight(0x777777, 0x0000FF, 1);
-    //this.scene.add(this.light);
+    this.scene.add(this.light);
 
     this.spotLight = new THREE.SpotLight(0xffffff);
-    this.spotLight.position.set(200, 1000, 100);
+    this.spotLight.position.set(30, 30, 30);
     this.spotLight.castShadow = true;
-    this.spotLight.shadowMapWidth = 1024;
-    this.spotLight.shadowMapHeight = 1024;
-    this.spotLight.shadowCameraNear = 500;
-    this.spotLight.shadowCameraFar = 4000;
-    this.spotLight.shadowCameraFov = 30;
+    this.spotLight.shadow.mapSize.width = 1024;
+    this.spotLight.shadow.mapSize.height = 1024;
+    this.spotLight.shadow.camera.near = 500;
+    this.spotLight.shadow.camera.far = 4000;
+    this.spotLight.shadow.camera.fov = 30;
     this.scene.add(this.spotLight);
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.cullFace = THREE.CullFaceBack;
-
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.container.appendChild(this.renderer.domElement);
@@ -40,8 +44,8 @@ class Application {
   }
 
   createListeners() {
-    var self = this;
-    window.addEventListener('resize', self.resize(), false);
+    window.addEventListener('resize', () => this.resize(), false);
+    //this.container.addEventListener('click', self.fullscreen, false);
   }
 
   fullscreen() {
@@ -56,28 +60,26 @@ class Application {
     }
   }
 
-  resize(e) {
-    console.log(e);
+  resize() {
     var width = window.innerWidth;
     var height = window.innerHeight;
-
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-
     this.renderer.setSize(width, height);
     //this.effect.setSize(width, height);
   }
 
   render() {
-    requestAnimationFrame(() => {
-      this.render();
-    });
 
     this.objects.forEach((object) => {
       object.update(this.clock.getDelta());
     });
 
     this.renderer.render(this.scene, this.camera);
+
+    requestAnimationFrame(() => {
+      this.render();
+    });
   }
 
   add(mesh) {

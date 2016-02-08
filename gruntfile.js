@@ -32,9 +32,9 @@ module.exports = function(grunt) {
           expand: true,
           flatten: true,
           src: [
-            './node_modules/three/three.min.js'
+            'vendors/*.js'
           ],
-          dest: 'dist/js/vendor/'
+          dest: 'dist/js/vendors/'
         }]
       }
     },
@@ -53,7 +53,7 @@ module.exports = function(grunt) {
           debug: true,
           paths: ['./src']
         },
-        transform: ['babelify'] //'uglifyify']
+        transform: ['babelify']
       },
       dist: {
         files: {

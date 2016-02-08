@@ -33,9 +33,6 @@
     "grunt-express-server": "^0.5.1",
     "load-grunt-tasks": "^3.1.0"
   },
-  "dependencies": {
-    "three": "^0.73.2"
-  },
   "engines": {
     "node": "0.12.x"
   }

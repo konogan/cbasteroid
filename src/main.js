@@ -22,4 +22,4 @@ var plane = new Floor({
 }, 0xffff00
 );
 
-app.add(plane);
+//app.add(plane);
