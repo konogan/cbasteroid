@@ -1,125 +1,166 @@
+import Capabilities from './capabilities';
+import Asteroid from './asteroid';
+import Starfield from './starfield';
+
+import Canon from './canon';
+
 class Application {
-  constructor(domElement) {
-    this.objects = [];
 
-    this.clock = new THREE.Clock();
-    this.center = new THREE.Vector3(0, 0, 0);
+    constructor(domElement) {
 
-    this.container = domElement;
+        this.capabilities = new Capabilities();
+        this.objects = [];
 
-    this.scene = new THREE.Scene();
-    // camera
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
-    this.camera.position.set(10, 5, 0);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        this.center = new THREE.Vector3(0, 0, 0);
+        this.container = domElement;
+        this.scene = new THREE.Scene();
 
+        //lights
+        this.light = new THREE.HemisphereLight(0x777777, 0x0000FF, 1);
+        this.scene.add(this.light);
 
-    //lights
-    this.light = new THREE.HemisphereLight(0x777777, 0x0000FF, 1);
-    this.scene.add(this.light);
+        this.spotLight = new THREE.SpotLight(0xffffff);
+        this.spotLight.position.set(30, 30, 30);
+        this.spotLight.castShadow = true;
+        this.spotLight.shadow.mapSize.width = 1024;
+        this.spotLight.shadow.mapSize.height = 1024;
+        this.spotLight.shadow.camera.near = 500;
+        this.spotLight.shadow.camera.far = 4000;
+        this.spotLight.shadow.camera.fov = 30;
+        this.scene.add(this.spotLight);
 
-    this.spotLight = new THREE.SpotLight(0xffffff);
-    this.spotLight.position.set(30, 30, 30);
-    this.spotLight.castShadow = true;
-    this.spotLight.shadow.mapSize.width = 1024;
-    this.spotLight.shadow.mapSize.height = 1024;
-    this.spotLight.shadow.camera.near = 500;
-    this.spotLight.shadow.camera.far = 4000;
-    this.spotLight.shadow.camera.fov = 30;
-    this.scene.add(this.spotLight);
+        // renderer
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.cullFace = THREE.BasicShadowMap;
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.container.appendChild(this.renderer.domElement);
 
-    // renderer
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.cullFace = THREE.CullFaceBack;
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.container.appendChild(this.renderer.domElement);
+        // main cam
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+        this.camera.position.set(0, 0, 0);
+        this.scene.add(this.camera);
 
-    // Fullscreen event
-    if (
-      document.fullscreenEnabled ||
-      document.webkitFullscreenEnabled ||
-      document.mozFullScreenEnabled ||
-      document.msFullscreenEnabled
-    ) {
-      window.addEventListener('click', event => this.setFullscreen(document.documentElement, event), false);
+        // debug camera
+        this.camera2 = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+        this.camera2.position.set(25, 25, 25);
+        this.camera2.lookAt(this.scene.position);
+
+        if (this.capabilities.isMobile()) {
+            this.controls = new THREE.DeviceOrientationControls(this.camera);
+            this.controls.connect();
+            if (
+                document.fullscreenEnabled ||
+                document.webkitFullscreenEnabled ||
+                document.mozFullScreenEnabled ||
+                document.msFullscreenEnabled
+            ) {
+                window.addEventListener('click', event => this.setFullscreen(document.documentElement, event), false);
+            }
+        }
+        if (this.capabilities.isCardBoard()) {
+            this.effect = new THREE.StereoEffect(this.renderer);
+            this.effect.eyeSeparation = 10;
+            this.effect.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        this.controls = new THREE.OrbitControls(this.camera, this.container);
+        this.controls.target.set(
+            this.camera.position.x + 0.1,
+            this.camera.position.y,
+            this.camera.position.z
+        );
+
+        window.addEventListener('resize', event => this.resize(event), false);
+
+        //debug
+        const CameraHelper = new THREE.CameraHelper(this.camera);
+        this.scene.add(CameraHelper);
+
+        this.buildScene();
     }
 
-    this.controls = new THREE.DeviceOrientationControls(this.camera);
+    buildScene() {
+        for (var i = 0; i < 50; i++) {
+            this.add(new Asteroid());
+        }
 
-    // this.controls = new THREE.OrbitControls(this.camera, this.container);
-    // this.controls.target.set(
-    //   this.camera.position.x + 0.1,
-    //   this.camera.position.y,
-    //   this.camera.position.z
-    // );
+        let starfield = new Starfield(10000);
+        this.add(starfield);
 
-    this.controls.connect();
+        let canon = new Canon();
+        this.camera.add(canon.getMesh());
 
-    // if (typeof window.DeviceOrientationEvent != "undefined") {
-    //   window.addEventListener('deviceorientation', event => this.setControls(event), true);
-    // } else {
-
-    // }
-    window.addEventListener('resize', event => this.resize(event), false);
-    this.animate();
-  }
-
-  // setControls(event) {
-  //   if (event.alpha) {
-  //     this.controls = new THREE.DeviceOrientationControls(this.camera, true);
-  //     this.controls.connect();
-  //     this.controls.update();
-
-  //     window.removeEventListener('deviceorientation', event => this.setControls(event), true);
-  //   }
-  // }
-
-  setFullscreen(element) {
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
+        console.log(canon);
     }
-  }
 
-  resize() {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
-    //this.effect.setSize(width, height);
-  }
+    run(debug = false) {
+        this.debug = debug;
+        this.clock = new THREE.Clock();
+        this.animate();
+    }
 
-  update(delta) {
-    this.controls.update();
-    this.objects.forEach((object) => {
-      object.update(delta);
-    });
-  }
+    stop() {
 
-  render(delta) {
-    this.renderer.render(this.scene, this.camera);
-  }
+    }
 
-  animate() {
-    this.update(this.clock.getDelta());
-    this.render(this.clock.getDelta());
+    setFullscreen(element) {
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    }
 
-    requestAnimationFrame(() => {
-      this.animate();
-    });
-  }
+    resize() {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height);
+        if (this.capabilities.isCardBoard()) {
+            this.effect.setSize(width, height);
+        }
+    }
 
-  add(mesh) {
-    this.objects.push(mesh);
-    this.scene.add(mesh.getMesh());
-  }
+    update(delta) {
+        this.controls.update();
+        this.objects.forEach((object) => {
+
+            //object.update(delta);
+        });
+    }
+
+    render(delta) {
+        if (this.capabilities.isCardBoard()) {
+            this.effect.render(this.scene, this.camera);
+        } else {
+            if(this.debug) {
+            this.renderer.render(this.scene, this.camera2);
+        } else {
+            this.renderer.render(this.scene, this.camera);
+        }
+        }
+    }
+
+    animate() {
+        this.update(this.clock.getDelta());
+        this.render(this.clock.getDelta());
+
+        requestAnimationFrame(() => {
+            this.animate();
+        });
+    }
+
+    add(mesh) {
+        this.objects.push(mesh);
+        this.scene.add(mesh.getMesh());
+    }
 }
 
 export default Application;
